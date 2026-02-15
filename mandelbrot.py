@@ -4,9 +4,15 @@ import numpy as np
 
 
 def main():
+    # Setup a "fractal generator UI"
+    # Get resolution from user
+    # Get type of fractal from user from pre list or one they want to try out
+
+    # Find a way to turn it into an animation that keeps the quality as you zoom in
     # Setup my  complex equations plot
     # If it converges, it's within the set - no colour,
     # else it's filled with colour based on the time taken to diverge
+    resolution = resolution_input()
     c_real_range = np.linspace(-2, 1, num=1000)
     c_imag_range = np.linspace(-1.5, 1.5, num=1000)
     real, imag = np.meshgrid(c_real_range, c_imag_range)
@@ -47,5 +53,19 @@ def divergence_test(c: complex) -> int:
     return 0
 
 
+def resolution_input() -> int:
+    '''
+    This takes the users integer input between 0-300 for the DPI
+    resolution
+    '''
+    while True:
+        resolution = input('Enter a DPI resolution between 0-300: ')
+        if resolution.isdigit() and int(resolution) in range(1, 301):
+            return int(resolution)
+
+        print('Invalid input, try again')
+
+
 if __name__ == '__main__':
-    main()
+    resolution = resolution_input()
+    print(resolution)
