@@ -5,8 +5,10 @@ import numpy as np
 
 def main():
     # Setup my  complex equations plot
-    c_real_range = np.linspace(-2, 1, num=50)
-    c_imag_range = np.linspace(-1.5, 1.5, num=50)
+    # If it converges, it's within the set - no colour,
+    # else it's filled with colour based on the time taken to diverge
+    c_real_range = np.linspace(-2, 1, num=1000)
+    c_imag_range = np.linspace(-1.5, 1.5, num=1000)
     real, imag = np.meshgrid(c_real_range, c_imag_range)
     boundary = [
         c_real_range.min(), c_real_range.max(),
@@ -14,13 +16,12 @@ def main():
     ]
     c = real + imag*1j
     vectorized_divergence_test = np.vectorize(divergence_test)
-    plt.imshow(vectorized_divergence_test(c), extent=boundary)
+    plt.imshow(
+        vectorized_divergence_test(c),
+        interpolation=None,
+        extent=boundary
+    )
     plt.show()
-    # plt.imshow(, extent=boundary)
-    # plt.show()
-
-    # If it converges, it's within the set - no colour,
-    # else it's filled with colour based on the time taken to diverge
 
 
 def divergence_test(c: complex) -> int:
@@ -35,7 +36,7 @@ def divergence_test(c: complex) -> int:
     '''
     z = 0
     count = 0
-    while count < 20:
+    while count < 25:
         z = z**2 + c
         count += 1
 
