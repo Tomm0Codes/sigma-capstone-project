@@ -13,8 +13,9 @@ def main():
         c_imag_range.min(), c_imag_range.max()
     ]
     c = real + imag*1j
-    # look into applying function to whole array of c values
-
+    vectorized_divergence_test = np.vectorize(divergence_test)
+    plt.imshow(vectorized_divergence_test(c), extent=boundary)
+    plt.show()
     # plt.imshow(, extent=boundary)
     # plt.show()
 
@@ -36,7 +37,6 @@ def divergence_test(c: complex) -> int:
     count = 0
     while count < 20:
         z = z**2 + c
-        print(z)
         count += 1
 
         # Escape radius is 2
@@ -47,4 +47,4 @@ def divergence_test(c: complex) -> int:
 
 
 if __name__ == '__main__':
-    print(divergence_test(1j))
+    main()
