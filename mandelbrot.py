@@ -3,18 +3,19 @@ import numpy as np
 import pyfiglet
 from mpl_point_clicker import clicker
 import time
+import sys
 
 
 def main():
     # Setup a "fractal generator UI" that gets choice of visual
     # (optional) and resolution for image
-    resolution, fractal_type_choice = fractal_UI()
-    fractal_generator(resolution, fractal_type_choice)
+    fractal_type_choice, resolution = fractal_UI()
+    print('Click on the area you\'d like to zoom into, or press "x" to exit')
+    fractal_generator('Mandelbrot Fractals', resolution)
     # Find a way to turn it into an animation that keeps the quality as you zoom in (main goal)
 
 
 def fractal_generator(fractal_type: str, resolution: int):
-    tic = time.perf_counter()
     c_real_range = np.linspace(-0.8, -0.7, num=resolution)
     c_imag_range = np.linspace(0.05, 0.15, num=resolution)
     real, imag = np.meshgrid(c_real_range, c_imag_range)
@@ -25,19 +26,24 @@ def fractal_generator(fractal_type: str, resolution: int):
     c = real + imag*1j
     vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
     mandelbrot_array = vectorized_mandelbrot_func(c)
-    toc = time.perf_counter()
-    print(f'{toc - tic:0.4f}s')
     plt.imshow(
         mandelbrot_array,
         interpolation=None,
         extent=boundary
     )
     plt.connect('button_press_event', on_click)
+    plt.connect('key_press_event', on_press)
     plt.show()
+
     # TO-DO: take coordinates from click event, make suitable box coords
     # around them then input them into the real and imag range at top of function
     # Need something to track level of zoom, so the coordinate box is relevant
     # Need a while loop so we can keep generating further in, until user says done
+
+
+def on_press(event):
+    if event.key == 'x':
+        sys.exit('Fractal Generator closed')
 
 
 def on_click(event) -> tuple:
