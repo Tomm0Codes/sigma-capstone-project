@@ -1,23 +1,21 @@
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import numpy as np
 import pyfiglet
+from mpl_point_clicker import clicker
 
 
 def main():
-    pass
     # Setup a "fractal generator UI" that gets choice of visual
     # (optional) and resolution for image
+    resolution, fractal_type_choice = fractal_UI()
+    fractal_generator(resolution, fractal_type_choice)
+
     # Find a way to turn it into an animation that keeps the quality as you zoom in (main goal)
 
 
-def draw_me(img: np.ndarray):
-    ...
-
-
-def fractal_generator():
-    c_real_range = np.linspace(-2, 1, num=1000)
-    c_imag_range = np.linspace(-1.5, 1.5, num=1000)
+def fractal_generator(fractal_type: str, resolution: int):
+    c_real_range = np.linspace(-0.8, -0.7, num=resolution)
+    c_imag_range = np.linspace(0.05, 0.15, num=resolution)
     real, imag = np.meshgrid(c_real_range, c_imag_range)
     boundary = [
         c_real_range.min(), c_real_range.max(),
@@ -30,7 +28,21 @@ def fractal_generator():
         interpolation=None,
         extent=boundary
     )
+    plt.connect('button_press_event', on_click)
     plt.show()
+    print(real_coord, imag_coord)
+
+
+def on_click(event) -> tuple:
+    '''
+    Accesses the coordinates of a click on the figure shown
+    and closes the figure
+    '''
+    global real_coord, imag_coord
+    if event.inaxes:
+        plt.close()
+        real_coord = event.xdata
+        imag_coord = event.ydata
 
 
 def mandelbrot_func(c: complex) -> int:
@@ -45,7 +57,7 @@ def mandelbrot_func(c: complex) -> int:
     '''
     z = 0
     count = 0
-    while count < 25:
+    while count < 250:
         z = z**2 + c
         count += 1
 
@@ -56,13 +68,13 @@ def mandelbrot_func(c: complex) -> int:
     return 0
 
 
-def user_integer_input(min: int, max: int, num_info: str) -> int:
+def user_integer_input(lower: int, upper: int, s: str) -> int:
     '''
     This checks and returns the users integer input
     '''
     while True:
-        user_num = input(f'{num_info} from {min}-{max}: ')
-        if user_num.isdigit() and int(user_num) in range(min, max):
+        user_num = input(s)
+        if user_num.isdigit() and int(user_num) in range(lower, upper+1):
             return int(user_num)
 
         print('Invalid input, try again')
@@ -78,13 +90,26 @@ def fractal_UI() -> tuple:
         font='slant'
     )
     print(banner)
-    fractals = {
+    fractal_types = {
         1: 'Mandelbrot Fractals',
         2: 'Julia Sets',
         3: 'Newton Fractals'
     }
-    fractal_choice = user_integer_input(1, 3, 'Choose a fractal')
-    resolution = user_integer_input(1, 300, 'Enter a DPI resolution')
+
+    for num, fractal_type in fractal_types.items():
+        print(f'>>> {num}: {fractal_type}\n')
+
+    fractal_type_choice = user_integer_input(
+        1,
+        len(fractal_types),
+        'Choose a fractal from the list above: '
+    )
+    resolution = user_integer_input(
+        1,
+        1000,
+        'Enter a square resolution (1-1000): '
+    )
+    return fractal_type_choice, resolution
 
 
 if __name__ == '__main__':
