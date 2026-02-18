@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyfiglet
 from mpl_point_clicker import clicker
+import time
 
 
 def main():
@@ -9,11 +10,11 @@ def main():
     # (optional) and resolution for image
     resolution, fractal_type_choice = fractal_UI()
     fractal_generator(resolution, fractal_type_choice)
-
     # Find a way to turn it into an animation that keeps the quality as you zoom in (main goal)
 
 
 def fractal_generator(fractal_type: str, resolution: int):
+    tic = time.perf_counter()
     c_real_range = np.linspace(-0.8, -0.7, num=resolution)
     c_imag_range = np.linspace(0.05, 0.15, num=resolution)
     real, imag = np.meshgrid(c_real_range, c_imag_range)
@@ -23,14 +24,20 @@ def fractal_generator(fractal_type: str, resolution: int):
     ]
     c = real + imag*1j
     vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
+    mandelbrot_array = vectorized_mandelbrot_func(c)
+    toc = time.perf_counter()
+    print(f'{toc - tic:0.4f}s')
     plt.imshow(
-        vectorized_mandelbrot_func(c),
+        mandelbrot_array,
         interpolation=None,
         extent=boundary
     )
     plt.connect('button_press_event', on_click)
     plt.show()
-    print(real_coord, imag_coord)
+    # TO-DO: take coordinates from click event, make suitable box coords
+    # around them then input them into the real and imag range at top of function
+    # Need something to track level of zoom, so the coordinate box is relevant
+    # Need a while loop so we can keep generating further in, until user says done
 
 
 def on_click(event) -> tuple:
@@ -47,7 +54,7 @@ def on_click(event) -> tuple:
 
 def mandelbrot_func(c: complex) -> int:
     '''
-    This function takes a complex number and tests if it converges
+    Takes a complex number and tests if it converges
     or diverges with repeated Mandelbrot iterations. It returns a count
     of 0 if the number converges, or the count for how long the number takes
     to diverge.
@@ -56,14 +63,15 @@ def mandelbrot_func(c: complex) -> int:
     :return: Iterations taken to converge/diverge
     '''
     z = 0
-    count = 0
-    while count < 250:
-        z = z**2 + c
-        count += 1
 
+    for iteration in range(250):
+        z = z**2 + c
         # Escape radius is 2
-        if abs(z) >= 2:
-            return count
+        if abs(z) > 2:
+            return iteration
+
+        # TO-DO: add brent's cycle detection algorithm to
+        # optimise converging points
 
     return 0
 
