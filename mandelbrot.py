@@ -7,33 +7,44 @@ import sys
 
 
 def main():
-    # Setup a "fractal generator UI" that gets choice of visual
-    # (optional) and resolution for image
-    fractal_type_choice, resolution = fractal_UI()
+    user_fractal_type, user_resolution = fractal_UI()
+    fractal_axes = {
+        'Mandelbrot Set': np.array(((-2, 1), (-1.5, 1.5)))
+    }
+    real_range, imag_range = fractal_axes[user_fractal_type]
     print('Click on the area you\'d like to zoom into, or press "x" to exit')
-    fractal_generator('Mandelbrot Fractals', resolution)
-    # Find a way to turn it into an animation that keeps the quality as you zoom in (main goal)
+    zoom = 1
+    while True:
+        fractal_generator(
+            user_fractal_type,
+            user_resolution,
+            real_range,
+            imag_range
+        )
+        zoom *= 10
+        real_range = np.array(((real_coord - 1/zoom), (real_coord + 1/zoom)))
+        imag_range = np.array(((imag_coord - 1/zoom), (imag_coord + 1/zoom)))
 
 
-def fractal_generator(fractal_type: str, resolution: int):
-    c_real_range = np.linspace(-0.8, -0.7, num=resolution)
-    c_imag_range = np.linspace(0.05, 0.15, num=resolution)
-    real, imag = np.meshgrid(c_real_range, c_imag_range)
-    boundary = [
-        c_real_range.min(), c_real_range.max(),
-        c_imag_range.min(), c_imag_range.max()
-    ]
-    c = real + imag*1j
-    vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
-    mandelbrot_array = vectorized_mandelbrot_func(c)
-    plt.imshow(
-        mandelbrot_array,
-        interpolation=None,
-        extent=boundary
+def fractal_generator(fractal_type: str, resolution: int, real_range: np.ndarray, imag_range: np.ndarray):
+    real, imag = np.meshgrid(
+        np.linspace(real_range[0], real_range[1], num=resolution),
+        np.linspace(imag_range[0], imag_range[1], num=resolution)
     )
-    plt.connect('button_press_event', on_click)
-    plt.connect('key_press_event', on_press)
-    plt.show()
+
+    if fractal_type == 'Mandelbrot Set':
+        c = real + imag*1j
+        vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
+        mandelbrot_array = vectorized_mandelbrot_func(c)
+        boundary = [real_range[0], real_range[1], imag_range[0], imag_range[1]]
+        plt.imshow(
+            mandelbrot_array,
+            interpolation=None,
+            extent=boundary
+        )
+        plt.connect('button_press_event', on_click)
+        plt.connect('key_press_event', on_press)
+        plt.show()
 
     # TO-DO: take coordinates from click event, make suitable box coords
     # around them then input them into the real and imag range at top of function
@@ -42,11 +53,14 @@ def fractal_generator(fractal_type: str, resolution: int):
 
 
 def on_press(event):
+    '''
+    Closes my figure and program on keypress
+    '''
     if event.key == 'x':
         sys.exit('Fractal Generator closed')
 
 
-def on_click(event) -> tuple:
+def on_click(event):
     '''
     Accesses the coordinates of a click on the figure shown
     and closes the figure
@@ -105,7 +119,7 @@ def fractal_UI() -> tuple:
     )
     print(banner)
     fractal_types = {
-        1: 'Mandelbrot Fractals',
+        1: 'Mandelbrot Set',
         2: 'Julia Sets',
         3: 'Newton Fractals'
     }
@@ -113,11 +127,13 @@ def fractal_UI() -> tuple:
     for num, fractal_type in fractal_types.items():
         print(f'>>> {num}: {fractal_type}\n')
 
-    fractal_type_choice = user_integer_input(
-        1,
-        len(fractal_types),
-        'Choose a fractal from the list above: '
-    )
+    fractal_type_choice = fractal_types[
+        user_integer_input(
+            1,
+            len(fractal_types),
+            'Choose a fractal from the list above: '
+        )
+    ]
     resolution = user_integer_input(
         1,
         1000,
