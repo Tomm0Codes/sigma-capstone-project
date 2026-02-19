@@ -9,9 +9,7 @@ def main():
     user_fractal_type, user_resolution = fractal_UI()
     fractal_axes = {'Mandelbrot Set': np.array((-2, 1, -1.5, 1.5))}
     fractal_gen_loop(
-        user_fractal_type,
-        user_resolution,
-        *tuple(fractal_axes[user_fractal_type])
+        user_fractal_type, user_resolution, *fractal_axes[user_fractal_type]
     )
 
 
@@ -21,13 +19,13 @@ def fractal_gen_loop(
     real_min: int,
     real_max: int,
     imag_min: int,
-    imag_max: int
+    imag_max: int,
 ):
     """
     Loop to open fractal figure, wait for user click,
     close figure, then open again on new zoomed point.
     """
-    zoom = 2
+    zoom = 5
     image_width = real_max - real_min
     image_height = imag_max - imag_min
 
@@ -61,9 +59,13 @@ def fractal_generator(
     if fractal_type == 'Mandelbrot Set':
         c = real + imag * 1j
         vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
-        mandelbrot_array = vectorized_mandelbrot_func(c)
         boundary = [real_min, real_max, imag_min, imag_max]
-        plt.imshow(mandelbrot_array, interpolation=None, extent=boundary)
+        plt.imshow(
+            vectorized_mandelbrot_func(c),
+            interpolation=None,
+            extent=boundary,
+            origin='lower',
+        )
         plt.connect('button_press_event', on_click)
         plt.connect('key_press_event', on_press)
         plt.show()
