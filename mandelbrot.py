@@ -7,10 +7,13 @@ import sys
 
 def main():
     user_fractal_type, user_resolution = fractal_UI()
-    fractal_axes = {'Mandelbrot Set': np.array((-2, 1, -1.5, 1.5))}
+    fractal_axes = {'Mandelbrot Set': (-2, 1, -1.5, 1.5)}
     fractal_gen_loop(
         user_fractal_type, user_resolution, *fractal_axes[user_fractal_type]
     )
+    # TO-DO:
+    # figure out way to go back a zoom step on keypress (main),
+    # add new fractal options (long term)
 
 
 def fractal_gen_loop(
@@ -69,6 +72,7 @@ def fractal_generator(
         plt.connect('button_press_event', on_click)
         plt.connect('key_press_event', on_press)
         plt.show()
+        # Add axis label
 
 
 def on_press(event):
@@ -77,6 +81,8 @@ def on_press(event):
     """
     if event.key == 'x':
         sys.exit('Fractal Generator closed')
+    elif event.key == 'b':
+        ...
 
 
 def on_click(event):
