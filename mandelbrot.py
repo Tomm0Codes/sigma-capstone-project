@@ -13,6 +13,7 @@ def main():
     )
     # TO-DO:
     # figure out way to go back a zoom step on keypress (main),
+    # add user option for different colour mapping
     # add new fractal options (long term)
 
 
@@ -63,16 +64,24 @@ def fractal_generator(
         c = real + imag * 1j
         vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
         boundary = [real_min, real_max, imag_min, imag_max]
+        vectorized_mandelbrot = vectorized_mandelbrot_func(c)
+        masked_array = np.ma.masked_where(
+            vectorized_mandelbrot == 0, vectorized_mandelbrot
+        )
         plt.imshow(
-            vectorized_mandelbrot_func(c),
+            masked_array,
             interpolation=None,
             extent=boundary,
             origin='lower',
         )
+        plt.title('Mandelbrot Set')
+        plt.xlabel('Re(c)')
+        plt.ylabel('Im(c)')
+        plt.colorbar().ax.set_title('#Iterations to Diverge')
         plt.connect('button_press_event', on_click)
         plt.connect('key_press_event', on_press)
+        plt.gca().set_facecolor('black')
         plt.show()
-        # Add axis label
 
 
 def on_press(event):
@@ -106,7 +115,7 @@ def mandelbrot_func(c: complex) -> int:
     """
     z = 0
 
-    for iteration in range(250):
+    for iteration in range(1, 251):
         z = z**2 + c
         # Escape radius is 2
         if abs(z) > 2:
