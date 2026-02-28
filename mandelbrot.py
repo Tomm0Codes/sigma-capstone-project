@@ -1,12 +1,15 @@
+"""Fractal Generator, currently including the Mandelbrot Set"""
+
+
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pyfiglet
-from mpl_point_clicker import clicker
-import sys
 
 
 def main():
-    user_fractal_type, user_resolution = fractal_UI()
+    """Full Generator function"""
+    user_fractal_type, user_resolution = fractal_user_interface()
     fractal_axes = {'Mandelbrot Set': (-2, 1, -1.5, 1.5)}
     fractal_gen_loop(
         user_fractal_type, user_resolution, *fractal_axes[user_fractal_type]
@@ -25,8 +28,7 @@ def fractal_gen_loop(
     imag_min: int,
     imag_max: int,
 ):
-    """
-    Loop to open fractal figure, wait for user click,
+    """Loop to open fractal figure, wait for user click,
     close figure, then open again on new zoomed point.
     """
     zoom = 5
@@ -52,8 +54,7 @@ def fractal_generator(
     imag_min: int,
     imag_max: int,
 ):
-    """
-    Generates a fractal image based on the axis range and resolution.
+    """Generates a fractal image based on the axis range and resolution.
     """
     real, imag = np.meshgrid(
         np.linspace(real_min, real_max, num=resolution),
@@ -85,8 +86,7 @@ def fractal_generator(
 
 
 def on_press(event):
-    """
-    Closes my figure and program on keypress.
+    """Closes my figure and program on keypress.
     """
     if event.key == 'x':
         sys.exit('Fractal Generator closed')
@@ -95,8 +95,7 @@ def on_press(event):
 
 
 def on_click(event):
-    """
-    Accesses the coordinates of a click on the figure shown
+    """Accesses the coordinates of a click on the figure shown
     and closes the figure.
     """
     global real_coord, imag_coord
@@ -107,8 +106,7 @@ def on_click(event):
 
 
 def mandelbrot_func(c: complex) -> int:
-    """
-    Takes a complex number and tests if it converges
+    """Takes a complex number and tests if it converges
     or diverges with repeated Mandelbrot iterations. It returns a count
     of 0 if the number converges, or the count of how many iterations it takes
     for the initial number to diverge.
@@ -128,8 +126,7 @@ def mandelbrot_func(c: complex) -> int:
 
 
 def user_integer_input(lower: int, upper: int, s: str) -> int:
-    """
-    This checks and returns the users integer input
+    """This checks and returns the users integer input
     """
     while True:
         try:
@@ -143,9 +140,8 @@ def user_integer_input(lower: int, upper: int, s: str) -> int:
             print('Invalid input, try again')
 
 
-def fractal_UI() -> tuple:
-    """
-    Gives the user an interactive interface to choose
+def fractal_user_interface() -> tuple:
+    """Gives the user an interactive interface to choose
     a fractal and its resolution.
     """
     banner = pyfiglet.figlet_format('Fractal Generator 1.0', font='slant')
