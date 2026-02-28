@@ -10,9 +10,10 @@ import pyfiglet
 def main():
     """Full Generator function"""
     user_fractal_type, user_resolution = fractal_user_interface()
-    fractal_axes = {'Mandelbrot Set': (-2, 1, -1.5, 1.5)}
+    fractal_axes_options = {'Mandelbrot Set': [-2, 1, -1.5, 1.5]}
     fractal_gen_loop(
-        user_fractal_type, user_resolution, *fractal_axes[user_fractal_type]
+        user_fractal_type, user_resolution,
+        fractal_axes_options[user_fractal_type]
     )
     # TO-DO:
     # figure out way to go back a zoom step on keypress (main),
@@ -23,48 +24,44 @@ def main():
 def fractal_gen_loop(
     fractal_type: str,
     resolution: int,
-    real_min: int,
-    real_max: int,
-    imag_min: int,
-    imag_max: int,
+    fractal_axes: tuple
 ):
     """Loop to open fractal figure, wait for user click,
     close figure, then open again on new zoomed point.
     """
     zoom = 5
-    image_width = real_max - real_min
-    image_height = imag_max - imag_min
+    image_width = fractal_axes[1] - fractal_axes[0]
+    image_height = fractal_axes[3] - fractal_axes[2]
 
     while True:
         fractal_generator(
-            fractal_type, resolution, real_min, real_max, imag_min, imag_max
+            fractal_type, resolution, fractal_axes
         )
-        real_min = real_coord - (image_width / (2 * zoom))
-        real_max = real_coord + (image_width / (2 * zoom))
-        imag_min = imag_coord - (image_height / (2 * zoom))
-        imag_max = imag_coord + (image_width / (2 * zoom))
+        image_width = fractal_axes[1] - fractal_axes[0]
+        image_height = fractal_axes[3] - fractal_axes[2]
+        fractal_axes[0] = real_coord - (image_width / (2 * zoom))
+        fractal_axes[1] = real_coord + (image_width / (2 * zoom))
+        fractal_axes[2] = imag_coord - (image_height / (2 * zoom))
+        fractal_axes[3] = imag_coord + (image_width / (2 * zoom))
         zoom *= zoom
 
 
 def fractal_generator(
     fractal_type: str,
     resolution: int,
-    real_min: int,
-    real_max: int,
-    imag_min: int,
-    imag_max: int,
+    fractal_axes: tuple
 ):
     """Generates a fractal image based on the axis range and resolution.
     """
     real, imag = np.meshgrid(
-        np.linspace(real_min, real_max, num=resolution),
-        np.linspace(imag_min, imag_max, num=resolution),
+        np.linspace(fractal_axes[0], fractal_axes[1], num=resolution),
+        np.linspace(fractal_axes[2], fractal_axes[3], num=resolution),
     )
 
     if fractal_type == 'Mandelbrot Set':
         c = real + imag * 1j
         vectorized_mandelbrot_func = np.vectorize(mandelbrot_func)
-        boundary = [real_min, real_max, imag_min, imag_max]
+        boundary = fractal_axes
         vectorized_mandelbrot = vectorized_mandelbrot_func(c)
         masked_array = np.ma.masked_where(
             vectorized_mandelbrot == 0, vectorized_mandelbrot
