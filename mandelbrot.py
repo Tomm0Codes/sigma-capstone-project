@@ -5,7 +5,6 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pyfiglet
-from functools import partial
 
 
 def main():
@@ -67,9 +66,7 @@ def fractal_generator(
         masked_array = np.ma.masked_where(
             vectorized_mandelbrot == 0, vectorized_mandelbrot
         )
-        fig, ax = plt.subplots()
-        callback_with_args = partial(on_click, storage_dict=coords)
-        fig.canvas.mpl_connect('button_press_event', callback_with_args)
+
         plt.imshow(
             masked_array,
             interpolation=None,
@@ -80,6 +77,7 @@ def fractal_generator(
         plt.xlabel('Re(c)')
         plt.ylabel('Im(c)')
         plt.colorbar().ax.set_title('#Iterations to Diverge')
+        plt.connect('button_press_event', on_click)
         plt.connect('key_press_event', on_press)
         plt.gca().set_facecolor('black')
         plt.show()
@@ -94,13 +92,15 @@ def on_press(event):
         ...
 
 
-def on_click(event, storage_dict: dict):
+def on_click(event):
     """Accesses the coordinates of a click on the figure shown
     and closes the figure.
     """
+    global real_coord, imag_coord
     if event.inaxes:
-        storage_dict['real'].append(event.xdata)
-        storage_dict['imag'].append(event.ydata)
+        plt.close()
+        real_coord = event.xdata
+        imag_coord = event.ydata
 
 
 def mandelbrot_func(c: complex) -> int:
